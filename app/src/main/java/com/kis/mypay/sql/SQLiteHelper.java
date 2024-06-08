@@ -57,27 +57,42 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     }
 
     // 打开数据库的读连接
-    public SQLiteDatabase openReadLink() {
-        if (DB == null || !DB.isOpen()) {
-            DB = Helper.getReadableDatabase();
+    public boolean openReadLink() {
+        try {
+            if (DB == null || !DB.isOpen()) {
+                DB = Helper.getReadableDatabase();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "openReadLink: ", e);
+            return false;
         }
-        return DB;
+        return true;
     }
 
     // 打开数据库的写连接
-    public SQLiteDatabase openWriteLink() {
-        if (DB == null || !DB.isOpen()) {
-            DB = Helper.getWritableDatabase();
+    public boolean openWriteLink() {
+        try {
+            if (DB == null || !DB.isOpen()) {
+                DB = Helper.getWritableDatabase();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "openWriteLink: ", e);
+            return false;
         }
-        return DB;
+        return true;
     }
 
     // 关闭数据库连接
-    public void closeLink() {
-        if (DB != null && DB.isOpen()) {
-            DB.close();
-            DB = null;
+    public boolean closeLink() {
+        try {
+            if (DB != null && DB.isOpen()) {
+                DB.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "closeLink: ", e);
+            return false;
         }
+        return true;
     }
 
     // 根据指定条件删除表记录
