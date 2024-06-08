@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.airbnb.lottie.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.divider.MaterialDivider;
 import com.kis.mypay.MainActivity.MainActivity;
@@ -90,7 +91,7 @@ public class LoginFragment extends Fragment {
         binding.loginButton.setOnClickListener(v -> {
             // 获取用户输入
             String phone = phoneEditText.getText().toString();
-            String token = tokenEditText.getText().toString();
+            String token = utils.Md5Decode32(tokenEditText.getText().toString());
 
             // 判断用户输入是否为空
             if (!phone.isEmpty() && !token.isEmpty()) {

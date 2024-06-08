@@ -90,7 +90,7 @@ public class RegisterFragment extends Fragment {
 
         binding.registerButton.setOnClickListener(v -> {
             String phone = phoneEditText.getText().toString();
-            String token = tokenEditText.getText().toString();
+            String token = utils.Md5Decode32(tokenEditText.getText().toString());
 
             if (DBHelper.insert(new UserInfo("User:"+phone, phone, token))) {
                 Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
