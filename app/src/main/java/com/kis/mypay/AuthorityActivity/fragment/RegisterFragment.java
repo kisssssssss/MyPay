@@ -92,12 +92,16 @@ public class RegisterFragment extends Fragment {
             String phone = phoneEditText.getText().toString();
             String token = utils.Md5Decode32(tokenEditText.getText().toString());
 
-            if (DBHelper.insert(new UserInfo("User:"+phone, phone, token))) {
-                Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(getActivity(), MainActivity.class);
-                startActivity(intent);
+            if (DBHelper.queryPhone(phone).isEmpty()) {
+                if (DBHelper.insert(new UserInfo("User:" + phone, phone, token))) {
+                    Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(activity, "注册失败", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(activity, "注册失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "该用户已存在", Toast.LENGTH_SHORT).show();
             }
         });
 
