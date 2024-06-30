@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,15 +12,15 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLiteHelper extends SQLiteOpenHelper {
+public class UserSQLHelper extends SQLiteOpenHelper {
     private static final String TAG = "DB";
     private static final String DB_NAME = "user.db"; // 数据库的名称
     private static final int DB_VERSION = 1; // 数据库的版本号
-    private static SQLiteHelper Helper = null; // 数据库帮助器的实例
+    private static UserSQLHelper Helper = null; // 数据库帮助器的实例
     private SQLiteDatabase DB = null; // 数据库的实例
     public static final String TABLE_NAME = "user_info"; // 表的名称
 
-    public SQLiteHelper(@Nullable Context context) {
+    public UserSQLHelper(@Nullable Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
@@ -35,85 +34,65 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                         + "_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
                         + "name VARCHAR NOT NULL,"
                         + "phone VARCHAR NOT NULL,"
-                        + "token VARCHAR NOT NULL"
+                        + "token VARCHAR NOT NULL,"
+                        + "autoLogin INT"
                         + ");"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS user");
-        db.execSQL("DROP TABLE IF EXISTS rate");
-        db.execSQL("DROP TABLE IF EXISTS pay");
+        db.execSQL("DROP TABLE IF EXISTS user_info");
         onCreate(db);
     }
 
     // 利用单例模式获取数据库帮助器的唯一实例
-    public static SQLiteHelper getInstance(Context context) {
+    public static UserSQLHelper getInstance(Context context) {
         if (Helper == null) {
-            Helper = new SQLiteHelper(context);
+            Helper = new UserSQLHelper(context);
         }
         return Helper;
     }
 
     // 打开数据库的读连接
-    public boolean openReadLink() {
-        try {
-            if (DB == null || !DB.isOpen()) {
-                DB = Helper.getReadableDatabase();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "openReadLink: ", e);
-            return false;
+    public SQLiteDatabase openReadLink() {
+        if (DB == null || !DB.isOpen()) {
+            DB = Helper.getReadableDatabase();
         }
-        return true;
+        return DB;
     }
 
     // 打开数据库的写连接
-    public boolean openWriteLink() {
-        try {
-            if (DB == null || !DB.isOpen()) {
-                DB = Helper.getWritableDatabase();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "openWriteLink: ", e);
-            return false;
+    public SQLiteDatabase openWriteLink() {
+        if (DB == null || !DB.isOpen()) {
+            DB = Helper.getWritableDatabase();
         }
-        return true;
+        return DB;
     }
 
     // 关闭数据库连接
-    public boolean closeLink() {
-        try {
-            if (DB != null && DB.isOpen()) {
-                DB.close();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "closeLink: ", e);
-            return false;
+    public SQLiteDatabase closeLink() {
+        if (DB != null && DB.isOpen()) {
+            DB.close();
         }
-        return true;
+        return DB;
     }
 
-    // 根据指定条件删除表记录
-    public int delete(String condition) {
-        // 执行删除记录动作，该语句返回删除记录的数目
+    public int deletePhone(String phone) {
+        String condition = String.format("phone='%s'", phone);
         return DB.delete(TABLE_NAME, condition, null);
     }
 
     // 删除该表的所有记录
     public int deleteAll() {
-        // 执行删除记录动作，该语句返回删除记录的数目
         return DB.delete(TABLE_NAME, "1=1", null);
     }
 
     // 往该表添加一条记录
     public boolean insert(UserInfo info) {
-        if (info.phone != null && !info.phone.isEmpty()) {
+        if (!info.phone.isEmpty()) {
             String condition = String.format("phone='%s'", info.phone);
-
-            List<UserInfo> tempList = query(condition);
-            if (!tempList.isEmpty()) {
+            if (!query(condition).isEmpty()) {
                 return update(info, condition) >= 0;
             }
         }
@@ -123,6 +102,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         cv.put("name", info.name);
         cv.put("phone", info.phone);
         cv.put("token", info.token);
+        cv.put("autoLogin", info.autoLogin ? 1 : 0);
         // 执行插入记录动作，该语句返回插入记录的行号
         boolean result = DB.insert(TABLE_NAME, "", cv) >= 0;
         closeLink();
@@ -136,6 +116,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         cv.put("name", info.name);
         cv.put("phone", info.phone);
         cv.put("token", info.token);
+        cv.put("autoLogin", info.autoLogin ? 1 : 0);
         // 执行更新记录动作，该语句返回更新的记录数量
         int result = DB.update(TABLE_NAME, cv, condition, null);
         closeLink();
@@ -163,6 +144,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             info.name = cursor.getString(1);
             info.phone = cursor.getString(2);
             info.token = cursor.getString(3);
+            info.autoLogin = cursor.getInt(4) == 1;
             infoList.add(info);
         }
 
@@ -175,5 +157,4 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public List<UserInfo> queryPhone(String phone) {
         return query(String.format("phone='%s'", phone));
     }
-
 }

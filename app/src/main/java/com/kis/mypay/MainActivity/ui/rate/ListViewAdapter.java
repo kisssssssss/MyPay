@@ -1,9 +1,14 @@
 package com.kis.mypay.MainActivity.ui.rate;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +29,8 @@ import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHolder> {
     private final List<DataModel> dataList;
+
+    private double currentDollar = 1;
 
     private int selectedPosition = RecyclerView.NO_POSITION;
 
@@ -37,41 +45,64 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
         return new ViewHolder(view);
     }
 
+    @SuppressLint({"ClickableViewAccessibility", "DefaultLocale"})
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        DataModel dataModel = dataList.get(position);
+        DataModel data = dataList.get(position);
 
-        holder.titleTextView.setText(dataModel.getTitle());
+        holder.titleTextView.setText(data.getTitle());
         // 设置货币图片
-        holder.countryIcon.setImageResource(dataModel.getImageResId());
+        holder.countryIcon.setImageResource(data.getImageResId());
         // 设置 EditText 的初始值
         holder.numberEditText.setText("0");
         // 设置货币符号
-        holder.moneyIcon.setImageResource(dataModel.getMoneyIcon());
+        holder.moneyIcon.setImageResource(data.getMoneyIcon());
 
-        float density = holder.itemView.getContext().getResources().getDisplayMetrics().density;
-        int padding8 = (int) (8 * density);
-        int padding24 = (int) (16 * density);
+        // 设置 Item 的背景颜色
         if (position == selectedPosition) {
-            changePaddingSmoothly(holder.itemView, padding24, padding24);
             holder.itemView.setBackgroundColor(Color.rgb(239, 239, 239));
         } else {
-            holder.itemView.setPadding(padding8, padding8, padding8, padding8);
-            holder.itemView.setBackgroundColor(Color.WHITE);
+            holder.itemView.setBackgroundColor(Color.rgb(253, 251, 254));
         }
-
+        // 设置 Item 的点击事件
         holder.itemView.setOnTouchListener((v, event) -> {
-            v.performClick();
-
-            // 高亮当前 Item
-            int previousPosition = selectedPosition;
-            selectedPosition = holder.getBindingAdapterPosition();
-            notifyItemChanged(previousPosition); // 刷新之前选中的Item
-            notifyItemChanged(selectedPosition); // 刷新当前选中的Item
-
-            // 聚焦输入框并弹出键盘
+            focus(holder);
             utils.requestEditTextFocus(holder.itemView.getContext(), v.findViewById(R.id.numberEditText));
             return false;
+        });
+        holder.numberEditText.setOnTouchListener((v, event) -> {
+            focus(holder);
+            return false;
+        });
+        holder.numberEditText.setText(String.format("%.2f", currentDollar * data.getRate()));
+        // 设置 EditText 的输入监听
+        Handler handler = new Handler(Looper.getMainLooper());
+        Runnable runnable = () -> {
+            currentDollar = Double.parseDouble(holder.numberEditText.getText().toString()) * data.getRate();
+            for (int i = 0; i < getItemCount(); i++) {
+                if (i != selectedPosition) {
+                    notifyItemChanged(i);
+                }
+            }
+        };
+        holder.numberEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (position == selectedPosition) {
+                    // 移除上一次的Runnable
+                    handler.removeCallbacks(runnable);
+                    // 添加新的Runnable，延迟300毫秒执行
+                    handler.postDelayed(runnable, 100);
+                }
+            }
         });
     }
 
@@ -101,6 +132,15 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
     public void resetSelectedPosition() {
         notifyItemChanged(selectedPosition);
         selectedPosition = RecyclerView.NO_POSITION;
+    }
+
+    public void focus(ViewHolder holder) {
+        int previousPosition = selectedPosition;
+        selectedPosition = holder.getBindingAdapterPosition();
+        notifyItemChanged(previousPosition); // 刷新之前选中的Item
+        notifyItemChanged(selectedPosition); // 刷新当前选中的Item
+
+        currentDollar = Double.parseDouble(holder.numberEditText.getText().toString());
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

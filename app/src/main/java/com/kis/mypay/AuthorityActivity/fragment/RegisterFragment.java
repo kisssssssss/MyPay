@@ -22,7 +22,7 @@ import com.google.android.material.divider.MaterialDivider;
 import com.kis.mypay.MainActivity.MainActivity;
 import com.kis.mypay.R;
 import com.kis.mypay.databinding.FragmentRegisterBinding;
-import com.kis.mypay.sql.SQLiteHelper;
+import com.kis.mypay.sql.UserSQLHelper;
 import com.kis.mypay.sql.UserInfo;
 import com.kis.mypay.utils.utils;
 
@@ -33,7 +33,7 @@ public class RegisterFragment extends Fragment {
 
     private View view;
 
-    SQLiteHelper DBHelper;
+    UserSQLHelper DBHelper;
 
     @SuppressLint("ClickableViewAccessibility")
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -41,7 +41,7 @@ public class RegisterFragment extends Fragment {
 
         activity = getActivity();
         view = binding.getRoot();
-        DBHelper = SQLiteHelper.getInstance(view.getContext());
+        DBHelper = UserSQLHelper.getInstance(view.getContext());
 
         LottieAnimationView lottieAnimationView = view.findViewById(R.id.register_icon);
         lottieAnimationView.setOnClickListener(v -> lottieAnimationView.playAnimation());
@@ -93,7 +93,12 @@ public class RegisterFragment extends Fragment {
             String token = utils.Md5Decode32(tokenEditText.getText().toString());
 
             if (DBHelper.queryPhone(phone).isEmpty()) {
-                if (DBHelper.insert(new UserInfo("User:" + phone, phone, token))) {
+                UserInfo info = new UserInfo();
+                info.name = "User:" + phone;
+                info.phone = phone;
+                info.token = token;
+
+                if (DBHelper.insert(info)) {
                     Toast.makeText(activity, "注册成功", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getActivity(), MainActivity.class);
                     startActivity(intent);

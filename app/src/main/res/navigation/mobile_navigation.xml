@@ -3,19 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_pay">
+    app:startDestination="@+id/navigation_qr">
 
     <fragment
-        android:id="@+id/navigation_pay"
-        android:name="com.kis.mypay.MainActivity.ui.pay.PayFragment"
-        android:label="@string/title_pay"
-        tools:layout="@layout/fragment_pay" />
+        android:id="@+id/navigation_qr"
+        android:name="com.kis.mypay.MainActivity.ui.qr.QrFragment"
+        android:label="@string/title_qr"
+        tools:layout="@layout/fragment_qr" />
 
     <fragment
         android:id="@+id/navigation_rate"
         android:name="com.kis.mypay.MainActivity.ui.rate.RateFragment"
         android:label="@string/title_rate"
-        tools:layout="@layout/fragment_pay" />
+        tools:layout="@layout/fragment_rate" />
 
     <fragment
         android:id="@+id/navigation_user"

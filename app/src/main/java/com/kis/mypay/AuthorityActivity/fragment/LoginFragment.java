@@ -2,7 +2,9 @@ package com.kis.mypay.AuthorityActivity.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,20 +16,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.airbnb.lottie.utils.Utils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.divider.MaterialDivider;
 import com.kis.mypay.MainActivity.MainActivity;
 import com.kis.mypay.R;
 import com.kis.mypay.databinding.FragmentLoginBinding;
-import com.kis.mypay.sql.SQLiteHelper;
+import com.kis.mypay.sql.UserSQLHelper;
 import com.kis.mypay.sql.UserInfo;
 import com.kis.mypay.utils.utils;
 
-import java.sql.Array;
 import java.util.List;
 
 public class LoginFragment extends Fragment {
@@ -37,7 +36,7 @@ public class LoginFragment extends Fragment {
 
     private View view;
 
-    SQLiteHelper DBHelper;
+    UserSQLHelper DBHelper;
 
     @SuppressLint({"ClickableViewAccessibility"})
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,11 +44,10 @@ public class LoginFragment extends Fragment {
 
         activity = getActivity();
         view = binding.getRoot();
-        DBHelper = SQLiteHelper.getInstance(view.getContext());
+        DBHelper = UserSQLHelper.getInstance(view.getContext());
 
         LottieAnimationView lottieAnimationView = view.findViewById(R.id.login_icon);
         lottieAnimationView.setOnClickListener(v -> lottieAnimationView.playAnimation());
-
 
         MaterialCardView cardView = view.findViewById(R.id.login_card);
         MaterialCardView cardView2 = view.findViewById(R.id.login_card_2);
@@ -86,16 +84,20 @@ public class LoginFragment extends Fragment {
         });
 
         CheckBox autoLoginCheckBox = view.findViewById(R.id.auto_login);
-        boolean isChecked = autoLoginCheckBox.isChecked();
 
         binding.loginButton.setOnClickListener(v -> {
             // 获取用户输入
             String phone = phoneEditText.getText().toString();
             String token = utils.Md5Decode32(tokenEditText.getText().toString());
+            boolean isChecked = autoLoginCheckBox.isChecked();
 
             // 判断用户输入是否为空
             if (!phone.isEmpty() && !token.isEmpty()) {
-                UserInfo info = new UserInfo("User:" + phone, phone, token);
+                UserInfo info = new UserInfo();
+                info.name = "User:" + phone;
+                info.phone = phone;
+                info.token = token;
+                info.autoLogin = isChecked;
 
                 List<UserInfo> searchRes = DBHelper.queryPhone(phone);
 
@@ -106,6 +108,14 @@ public class LoginFragment extends Fragment {
                     // 判断用户密码是否正确
                     if (searchRes.get(0).token.equals(token)) {
                         Toast.makeText(activity, "登录成功", Toast.LENGTH_SHORT).show();
+
+                        // 保存用户信息
+                        SharedPreferences sharedPreferences = activity.getSharedPreferences("data", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("current_user_phone", phone);
+                        editor.putBoolean("auto_login", isChecked);
+                        editor.commit();
+
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         startActivity(intent);
                     } else {

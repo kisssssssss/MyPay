@@ -25,8 +25,16 @@
         </activity>
         <activity
             android:name="com.kis.mypay.MainActivity.MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.MyPay"></activity>
+            android:exported="false"
+            android:theme="@style/Theme.MyPay">
+
+        </activity>
+        <activity
+            android:name="com.kis.mypay.SettingsActivity.SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyPay">
+
+        </activity>
     </application>
 
 </manifest>

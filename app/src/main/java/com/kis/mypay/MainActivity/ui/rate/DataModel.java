@@ -1,5 +1,4 @@
 package com.kis.mypay.MainActivity.ui.rate;
-
 public class DataModel {
     private final String title;
 

@@ -1,4 +1,4 @@
-package com.kis.mypay.MainActivity.ui.pay;
+package com.kis.mypay.MainActivity.ui.qr;
 
 import android.graphics.Bitmap;
 
@@ -14,8 +14,8 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PayViewModel extends ViewModel {
-    public PayViewModel() {
+public class QrViewModel extends ViewModel {
+    public QrViewModel() {
 
     }
 

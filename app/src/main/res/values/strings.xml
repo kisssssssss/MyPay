@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MyPay</string>
     <string name="title_home">Home</string>
-    <string name="title_pay">Pay</string>
+    <string name="title_qr">Qr</string>
     <string name="title_rate">Rate</string>
     <string name="title_user">User</string>
     <string name="exchange">exchange</string>
@@ -10,4 +10,6 @@
     <string name="login">Login</string>
     <string name="token">token</string>
     <string name="phone">phone</string>
+    <string name="pay">支付</string>
+    <string name="receive">收款</string>
 </resources>

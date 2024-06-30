@@ -5,11 +5,7 @@ public class UserInfo {
     public String phone;
     public String token;
 
-    public UserInfo(String name, String phone, String token) {
-        this.name = name;
-        this.phone = phone;
-        this.token = token;
-    }
+    public boolean autoLogin = false;
 
     public UserInfo() {
 
